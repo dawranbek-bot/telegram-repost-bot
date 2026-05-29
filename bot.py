@@ -62,7 +62,7 @@ async def handler(event):
                 if msg.message:
                     caption = msg.message
 
-            caption += "\n\n@jetkeriwshi_xabar - jańaliqlar"
+            caption += "\n\n@jetkeriwshi_xabar - Bidziń jetkeriwshi xabar kanalǵa  aǵza bolıń ✅"
 
             await client.send_file(
                 target_channel,
@@ -85,7 +85,7 @@ async def handler(event):
 
         caption = (
             (event.message.message or "")
-            + "\n\n@jetkeriwshi_xabar - jańaliqlar"
+            + "\n\n@jetkeriwshi_xabar - jetkeriwshi xabar kanalǵa  aǵza bolıń ✅"
         )
 
         if event.message.media:
