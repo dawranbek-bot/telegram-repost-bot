@@ -85,7 +85,7 @@ async def handler(event):
 
         caption = (
             (event.message.message or "")
-            + "\n\n@jetkeriwshi_bot - jańaliqlar"
+            + "\n\n@jetkeriwshi_xabar - jańaliqlar"
         )
 
         if event.message.media:
