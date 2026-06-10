@@ -1,110 +1,143 @@
-```python
-from telethon import TelegramClient, events, Button
+from telethon import TelegramClient, events
+import asyncio
+import time
 
-api_id = 372284549
-api_hash = "82b00418c470d6f0b31603ec40a0900d9"
+api_id = 37228454
+api_hash = "82b00418c470d6f0b31603ec40a0900d"  # <-- bu yerga api_hash qo'ying
 
-BOT_TOKEN = "8874804432:AAFV_kKsEzX1xL6VQXfRlRDl3y93noRtxH49"
-
-client = TelegramClient("taxi_bot", api_id, api_hash)
-
-channels = {
-    "shimbay1": "@ShimbayNukusTaxi1",
-    "moynaq": "@moynaq_nokis2",
-    "kungrad1": "@nukus_kungrad47",
-    "kungrad2": "@kungrad_nukus001",
-    "taxatakopir": "@taxtanukustaxigruppa",
-    "qaraozek": "@Qaraozeknukustaxi247",
-    "tortkul": "@tortkulnukus",
-    "qanlikol": "@QANLIKOL_NOKIS_NUKUS_QANLIKOL",
-    "kegeyli": "@Kegeyli_Nukus_01",
-    "shomanay": "@Shomanay_nukus",
-    "shimbay2": "@shimbaynokis3"
-}
-
-main_buttons = [
-    [Button.inline("🚕 TAKSILARNI TANGLANG", b"menu")]
+source_channels = [
+    "@ShimbayNukusTaxi1",
+    "@moynaq_nokis2",
+    "@nukus_kungrad47",
+    "@kungrad_nukus001",
+    "@taxtanukustaxigruppa",
+    "@Qaraozeknukustaxi247",
+    "@tortkulnukus",
+    "@QANLIKOL_NOKIS_NUKUS_QANLIKOL",
+    "@Kegeyli_Nukus_01",
+    "@Shomanay_nukus",
+    "@shimbaynokis3"
 ]
 
-menu_buttons = [
-    [Button.inline("SHIMBAY-NUKUS", b"shimbay1")],
-    [Button.inline("MOYNAQ-NUKUS", b"moynaq")],
-    [Button.inline("KUNGRAD-NUKUS", b"kungrad1")],
-    [Button.inline("KUNGRAD-NUKUS2", b"kungrad2")],
-    [Button.inline("TAXATAKOPIR-NUKUS", b"taxatakopir")],
-    [Button.inline("QARAOZEK-NUKUS", b"qaraozek")],
-    [Button.inline("TORTKUL-NUKUS", b"tortkul")],
-    [Button.inline("QANLIKOL-NUKUS", b"qanlikol")],
-    [Button.inline("KEGEYLI-NUKUS", b"kegeyli")],
-    [Button.inline("SHOMANAY-NUKUS", b"shomanay")],
-    [Button.inline("SHIMBAY-NUKUS2", b"shimbay2")],
-    [Button.inline("⬅️ ORQAGA", b"back")]
-]
+target_channel = "@jetkeriwshi_xabar"
+
+client = TelegramClient("session", api_id, api_hash)
+
+processed_groups = set()
+processed_messages = set()
+
+# ⏱ 5 minut limit
+last_send_time = 0
+DELAY = 300  # 5 minut
+
+def can_send():
+    global last_send_time
+    return time.time() - last_send_time >= DELAY
+
+def update_timer():
+    global last_send_time
+    last_send_time = time.time()
 
 
-@client.on(events.NewMessage(pattern="/start"))
-async def start(event):
-    await event.respond(
-        "Salom 👋\n\nBu yerdan hamma viloyatlarga taksilar bor.\n\nTaksilarni tanlang:",
-        buttons=main_buttons
-    )
+@client.on(events.NewMessage(chats=source_channels))
+async def handler(event):
+    global last_send_time
 
+    try:
+        # ===== ALBUM POST =====
+        if event.message.grouped_id:
 
-@client.on(events.CallbackQuery)
-async def callback(event):
+            if not can_send():
+                print("⏳ Tanaffus: 5 minut kutish kerak (album)")
+                return
 
-    data = event.data.decode()
+            group_id = event.message.grouped_id
 
-    if data == "menu":
-        await event.edit(
-            "Kerakli yo'nalishni tanlang:",
-            buttons=menu_buttons
-        )
-        return
+            if group_id in processed_groups:
+                return
 
-    if data == "back":
-        await event.edit(
-            "Salom 👋\n\nBu yerdan hamma viloyatlarga taksilar bor.\n\nTaksilarni tanlang:",
-            buttons=main_buttons
-        )
-        return
+            processed_groups.add(group_id)
 
-    if data in channels:
+            await asyncio.sleep(2)
 
-        channel = channels[data]
-
-        try:
             messages = await client.get_messages(
-                channel,
-                limit=2
+                event.chat_id,
+                limit=20
             )
 
-            await event.respond(
-                f"📢 {channel} kanalidagi oxirgi 2 ta xabar:"
-            )
+            album = [
+                msg for msg in messages
+                if msg.grouped_id == group_id
+            ]
 
-            for msg in reversed(messages):
+            album.reverse()
 
+            files = []
+            caption = ""
+
+            for msg in album:
                 if msg.media:
+                    files.append(msg.media)
 
-                    await client.send_file(
-                        event.chat_id,
-                        msg.media,
-                        caption=msg.text or ""
-                    )
+                if msg.message:
+                    caption = msg.message
 
-                else:
+            caption += "\n\n@jetkeriwshi_xabar - Bidziń jetkeriwshi xabar kanalǵa aǵza bolıń ✅"
 
-                    await client.send_message(
-                        event.chat_id,
-                        msg.text or "Matnsiz xabar"
-                    )
+            await client.send_file(
+                target_channel,
+                files,
+                caption=caption
+            )
 
-        except Exception as e:
-            await event.respond(f"Xato: {e}")
+            update_timer()
+
+            print("📤 Album yuborildi")
+            return
+
+        # ===== ODDIY POST =====
+
+        key = f"{event.chat_id}_{event.id}"
+
+        if key in processed_messages:
+            return
+
+        processed_messages.add(key)
+
+        if not can_send():
+            print("⏳ Tanaffus: 5 minut kutish kerak (oddiy post)")
+            return
+
+        caption = (
+            (event.message.message or "")
+            + "\n\n@jetkeriwshi_xabar - jetkeriwshi xabar kanalǵa aǵza bolıń ✅"
+        )
+
+        if event.message.media:
+
+            await client.send_file(
+                target_channel,
+                file=event.message.media,
+                caption=caption
+            )
+
+        else:
+
+            await client.send_message(
+                target_channel,
+                caption
+            )
+
+        update_timer()
+
+        print("📤 Post yuborildi")
+
+    except Exception as e:
+        print("❌ Xato:", e)
 
 
-client.start(bot_token=BOT_TOKEN)
-print("Bot ishga tushdi...")
-client.run_until_disconnected()
-```
+print("🤖 Bot ishga tushdi...")
+client.start()
+
+with client:
+    client.run_until_disconnected()
