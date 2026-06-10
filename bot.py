@@ -4,18 +4,7 @@ import asyncio
 api_id = 37228454
 api_hash = "82b00418c470d6f0b31603ec40a0900d"
 
-source_channels = [
-  
-    "@ShimbayNukusTaxi1",
-    "@moynaq_nokis2",
-    "@nukus_kungrad47",
-    "@kungrad_nukus001",
-    "@taxtanukustaxigruppa",
-    "@Qaraozeknukustaxi247",
-    "@tortkulnukus",
-    "@QANLIKOL_NOKIS_NUKUS_QANLIKOL",
-    "@Kegeyli_Nukus_01",
-    "@Shomanay_nukus",
+source_channels = [ "@ShimbayNukusTaxi1","@moynaq_nokis2","@nukus_kungrad47","@kungrad_nukus001","@taxtanukustaxigruppa","@Qaraozeknukustaxi247","@tortkulnukus","@QANLIKOL_NOKIS_NUKUS_QANLIKOL","@Kegeyli_Nukus_01","@Shomanay_nukus","@shimbaynokis3"
 
     
 ]
