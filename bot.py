@@ -5,15 +5,18 @@ api_id = 37228454
 api_hash = "82b00418c470d6f0b31603ec40a0900d"
 
 source_channels = [
-    "@ne_janaliq",
-    "@KARAKALPAK24",
-    "@Pixel_Nukus",
-    "@xaliq_ushin",
-    "@QARAQALPAQ_NUKUS_SHIMBAY",
-    "@JANALIQLAR24_tg",
-    "@Nukus",
-    "@msk7days",
-    "@jumis1_nokis"
+  
+    "@ShimbayNukusTaxi1",
+    "@moynaq_nokis2",
+    "@nukus_kungrad47",
+    "@kungrad_nukus001",
+    "@taxtanukustaxigruppa",
+    "@Qaraozeknukustaxi247",
+    "@tortkulnukus",
+    "@QANLIKOL_NOKIS_NUKUS_QANLIKOL",
+    "@Kegeyli_Nukus_01",
+    "@Shomanay_nukus",
+
     
 ]
 
