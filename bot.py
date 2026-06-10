@@ -1,10 +1,10 @@
 ```python
 from telethon import TelegramClient, events, Button
 
-api_id = 37228454
-api_hash = "82b00418c470d6f0b31603ec40a0900d"
+api_id = 372284549
+api_hash = "82b00418c470d6f0b31603ec40a0900d9"
 
-BOT_TOKEN = "8874804432:AAFV_kKsEzX1xL6VQXfRlRDl3y93noRtxH4"
+BOT_TOKEN = "8874804432:AAFV_kKsEzX1xL6VQXfRlRDl3y93noRtxH49"
 
 client = TelegramClient("taxi_bot", api_id, api_hash)
 
