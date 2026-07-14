@@ -7,7 +7,7 @@ bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    bot.send_message(message.chat.id, "👋 Salommmm! Botga xabar yozing, u avtomatik ravishda adminga yuboriladi.")
+    bot.send_message(message.chat.id, "👋 Salommmm! sizga nima kerak.")
 
 # Har qanday xabarni admin ID'ga yuborish
 @bot.message_handler(func=lambda message: True)
