@@ -1,7 +1,7 @@
 import telebot
 
-TOKEN = "8874804432:AAFV_kKsEzX1xL6VQXfRlRDl3y93noRtxH4c"  # O'z bot tokeningizni kiriting
-ADMIN_ID = 5757866670  # Xabarlarni qabul qiluvchi Telegram ID (Сарыбаев Дауран)
+TOKEN = "6442203249:AAH0GJh68n6YlE8kNOncCMp-wcdbRcru1hc"  # O'z bot tokeningizni kiriting
+ADMIN_ID = 7490075648  # Xabarlarni qabul qiluvchi Telegram ID (Сарыбаев Дауран)
 
 bot = telebot.TeleBot(TOKEN)
 
