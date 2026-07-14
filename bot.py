@@ -1,447 +1,196 @@
-import json
-import requests
-
-from datetime import time
-from zoneinfo import ZoneInfo
-
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 from telegram.ext import (
     Application,
     CommandHandler,
-    MessageHandler,
+    CallbackQueryHandler,
     ContextTypes,
-    filters
+    ConversationHandler,
+    MessageHandler,
+    filters,
 )
 
+TOKEN = "8874804432:AAFV_kKsEzX1xL6VQXfRlRDl3y93noRtxH4"
 
-BOT_TOKEN = "8874804432:AAFV_kKsEzX1xL6VQXfRlRDl3y93noRtxH4"
-API_KEY = "eda2b5e469e24488923110846261906"
+ADMIN_ID = 7490075648
+
+MESSAGE = 1
 
 
-FILE = "obuna.json"
-
-
-districts = {
-
-    "📍 Chimboy": "Chimbay, Uzbekistan",
-    "📍 Nukus": "Nukus, Uzbekistan",
-    "📍 Taxiatosh": "Takhiatash, Uzbekistan",
-    "📍 Qo‘ng‘irot": "Kungrad, Uzbekistan",
-    "📍 Xo‘jayli": "Khojeli, Uzbekistan",
-    "📍 Beruniy": "Beruniy, Uzbekistan",
-    "📍 Amudaryo": "Amudarya, Uzbekistan",
-    "📍 To‘rtko‘l": "Turtkul, Uzbekistan",
-    "📍 Ellikqal’a": "Ellikkala, Uzbekistan",
-    "📍 Mo‘ynoq": "Muynak, Uzbekistan",
-    "📍 Kegeyli": "Kegeyli, Uzbekistan",
-    "📍 Shumanay": "Shumanay, Uzbekistan",
-    "📍 Qorao‘zak": "Qaraozek, Uzbekistan",
-    "📍 Qanliko‘l": "Kanlikul, Uzbekistan",
-    "📍 Taxtako‘pir": "Takhtakupyr, Uzbekistan"
-
+courses = {
+    "google": {
+        "name": "GOOGLE PROJECT MANAGEMENT",
+        "image": "1.jpg",
+        "price": "50 min swm"
+    },
+    "microsoft": {
+        "name": "Microsoft Project Management: Build Job-Ready Skills",
+        "image": "2.jpg",
+        "price": "70 min swm"
+    },
+    "ibm": {
+        "name": "IBM IT Support",
+        "image": "3.jpg",
+        "price": "100 min swm"
+    },
+    "meta": {
+        "name": "META FRONT-END DEVELOPER",
+        "image": "4.jpg",
+        "price": "100 min swm"
+    },
+    "aws": {
+        "name": "AWS GENERATIV AI",
+        "image": "5.jpg",
+        "price": "30 min swm"
+    }
 }
 
 
-
-def load_users():
-
-    try:
-
-        with open(
-            FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            return json.load(f)
-
-    except:
-
-        return {}
-
-
-
-
-def save_users(data):
-
-    with open(
-        FILE,
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        json.dump(
-            data,
-            f,
-            ensure_ascii=False,
-            indent=4
-        )
-
-
-
-
-
-def weather(city):
-
-
-    url = (
-
-        "https://api.weatherapi.com/v1/forecast.json?"
-
-        f"key={API_KEY}"
-
-        f"&q={city}"
-
-        "&days=10"
-
-        "&aqi=no"
-
-        "&alerts=no"
-
-    )
-
-
-    response = requests.get(
-        url,
-        timeout=15
-    )
-
-
-    data = response.json()
-
-
-
-    if "error" in data:
-
-        return "❌ Ob-havo topilmadi"
-
-
-
-    current = data["current"]
-
-
-
-    text = (
-
-        f"🌤 {data['location']['name']}\n\n"
-
-
-        f"📅 Bugun  🌡 {current['temp_c']}°C\n\n"
-
-
-        f"Havo turi: ☁ {current['condition']['text']}\n"
-
-        f"Shamol: 💨 {current['wind_kph']} km/soat\n"
-
-        f"Namlik: 💧 {current['humidity']}%\n\n"
-
-
-        "📆 10 kunlik prognoz:\n\n"
-
-    )
-
-
-
-    for i, day in enumerate(
-        data["forecast"]["forecastday"]
-    ):
-
-
-        text += (
-
-            f"{i+1}-kun  "
-
-            f"{day['day']['mintemp_c']}°C"
-
-            " - "
-
-            f"{day['day']['maxtemp_c']}°C\n"
-
-        )
-
-
-
-    return text
-
-
-
-
-
-async def start(
-    update:Update,
-    context:ContextTypes.DEFAULT_TYPE
-):
-
-
-    keyboard = []
-
-
-    for item in districts:
-
-        keyboard.append(
-            [item]
-        )
-
-
-    keyboard.append(
-        ["❌ Obunani bekor qilish"]
-    )
-
-
-    markup = ReplyKeyboardMarkup(
-        keyboard,
-        resize_keyboard=True
-    )
-
-
-
+def main_menu():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("🎓 Sertifikat olish", callback_data="certificate")]
+    ])
+
+
+def certificate_menu():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("GOOGLE PROJECT MANAGEMENT", callback_data="google")],
+        [InlineKeyboardButton("Microsoft Project Management: Build Job-Ready Skills", callback_data="microsoft")],
+        [InlineKeyboardButton("IBM IT Support", callback_data="ibm")],
+        [InlineKeyboardButton("META FRONT-END DEVELOPER", callback_data="meta")],
+        [InlineKeyboardButton("AWS GENERATIV AI", callback_data="aws")],
+        [InlineKeyboardButton("⬅️ Orqaga", callback_data="back_main")]
+    ])
+
+
+def course_menu():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("📩 Adminga murojaat", callback_data="contact_admin")],
+        [InlineKeyboardButton("⬅️ Orqaga", callback_data="certificate")]
+    ])
+
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-
-        "🌤 Qoraqalpog‘iston ob-havo boti\n\n"
-
-        "Tumanni tanlang:",
-
-        reply_markup=markup
-
+        "Kerakli bo'limni tanlang.",
+        reply_markup=main_menu()
     )
 
 
+async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    query = update.callback_query
+    await query.answer()
 
+    data = query.data
 
+    if data == "back_main":
+        await query.edit_message_text(
+            "Kerakli bo'limni tanlang.",
+            reply_markup=main_menu()
+        )
+        return
 
+    if data == "certificate":
+        await query.edit_message_text(
+            "Sertifikatni tanlang:",
+            reply_markup=certificate_menu()
+        )
+        return
 
-async def message_handler(
-    update:Update,
-    context:ContextTypes.DEFAULT_TYPE
-):
+    if data in courses:
 
+        context.user_data["course"] = data
 
-    user_id = str(
-        update.effective_user.id
-    )
+        course = courses[data]
 
+        await query.message.delete()
 
-    text = update.message.text
-
-
-
-    users = load_users()
-
-
-
-    if text == "❌ Obunani bekor qilish":
-
-
-        if user_id in users:
-
-            del users[user_id]
-
-            save_users(users)
-
-
-            await update.message.reply_text(
-
-                "✅ Obuna bekor qilindi"
-
+        with open(course["image"], "rb") as photo:
+            await context.bot.send_photo(
+                chat_id=query.message.chat.id,
+                photo=photo,
+                caption=f"{course['name']}\n\nNarxi: {course['price']}",
+                reply_markup=course_menu()
             )
-
-        else:
-
-            await update.message.reply_text(
-
-                "Siz obuna bo‘lmagansiz"
-
-            )
-
 
         return
 
+    if data == "contact_admin":
 
-
-
-    if text in districts:
-
-
-        users[user_id] = text
-
-        save_users(users)
-
-
-
-        result = weather(
-            districts[text]
+        await query.message.reply_text(
+            "Xabaringizni yozing:"
         )
 
+        return MESSAGE
 
 
-        await update.message.reply_text(
+async def receive_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-            "✅ Obuna qilindi\n\n"
+    text = update.message.text
 
-            "Xabar kelish vaqtlari:\n"
+    course = context.user_data.get("course", "")
 
-            "08:00\n"
+    user = update.effective_user
 
-            "13:00\n"
+    msg = f"""
+📩 Yangi murojaat
 
-            "16:18\n\n"
+Kurs:
+{courses[course]['name']}
 
-            + result
+Foydalanuvchi:
+{user.full_name}
 
-        )
+Username:
+@{user.username}
 
+ID:
+{user.id}
 
-    else:
+Xabar:
+{text}
+"""
 
-
-        await update.message.reply_text(
-
-            "Tumanni tugma orqali tanlang"
-
-        )
-
-
-
-
-
-
-
-async def send_weather(
-    context:ContextTypes.DEFAULT_TYPE
-):
-
-
-    users = load_users()
-
-
-
-    for user_id, district in users.items():
-
-
-        try:
-
-
-            text = weather(
-
-                districts[district]
-
-            )
-
-
-
-            await context.bot.send_message(
-
-                chat_id=int(user_id),
-
-                text=text
-
-            )
-
-
-        except Exception as e:
-
-            print(e)
-
-
-
-
-
-
-
-def main():
-
-
-    app = Application.builder().token(
-        BOT_TOKEN
-    ).build()
-
-
-
-    app.add_handler(
-
-        CommandHandler(
-            "start",
-            start
-        )
-
+    await context.bot.send_message(
+        chat_id=ADMIN_ID,
+        text=msg
     )
 
-
-
-    app.add_handler(
-
-        MessageHandler(
-            filters.TEXT,
-            message_handler
-        )
-
+    await update.message.reply_text(
+        "✅ Xabaringiz adminga yuborildi."
     )
 
+    return ConversationHandler.END
 
 
-    job = app.job_queue
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    return ConversationHandler.END
 
 
+app = Application.builder().token(TOKEN).build()
 
-    tashkent = ZoneInfo(
-        "Asia/Tashkent"
-    )
+conv = ConversationHandler(
+    entry_points=[
+        CallbackQueryHandler(buttons, pattern="contact_admin")
+    ],
+    states={
+        MESSAGE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, receive_message)
+        ]
+    },
+    fallbacks=[
+        CommandHandler("cancel", cancel)
+    ],
+)
 
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CallbackQueryHandler(buttons))
+app.add_handler(conv)
 
+print("Bot ishga tushdi...")
 
-    job.run_daily(
-
-        send_weather,
-
-        time(
-            8,
-            0,
-            tzinfo=tashkent
-        )
-
-    )
-
-
-    job.run_daily(
-
-        send_weather,
-
-        time(
-            13,
-            0,
-            tzinfo=tashkent
-        )
-
-    )
-
-
-    job.run_daily(
-
-        send_weather,
-
-        time(
-            16,
-            51,
-            tzinfo=tashkent
-        )
-
-    )
-
-
-
-    print(
-        "BOT ISHGA TUSHDI"
-    )
-
-
-    app.run_polling()
-
-
-
-
-
-
-if __name__ == "__main__":
-
-    main()
+app.run_polling()
